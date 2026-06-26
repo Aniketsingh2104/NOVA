@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:gravity="center"
+    android:background="@drawable/bg_card" android:padding="12dp">
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="NOVA" android:textSize="16sp" android:textStyle="bold"
+        android:textColor="@color/nova_purple" android:letterSpacing="0.1"/>
+    <TextView android:id="@+id/widget_status" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:text="Listening"
+        android:textSize="12sp" android:textColor="@color/text_secondary" android:layout_marginTop="2dp"/>
+    <TextView android:id="@+id/widget_last_cmd" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:text="Say your wake word"
+        android:textSize="11sp" android:textColor="@color/text_primary"
+        android:gravity="center" android:maxLines="2" android:ellipsize="end"
+        android:layout_marginTop="6dp"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center" android:layout_marginTop="10dp">
+        <Button android:id="@+id/widget_toggle_btn" android:layout_width="wrap_content"
+            android:layout_height="32dp" android:text="Pause" android:textSize="12sp"
+            android:layout_marginEnd="8dp"/>
+        <Button android:id="@+id/widget_mic_btn" android:layout_width="32dp"
+            android:layout_height="32dp" android:text="M" android:textSize="12sp"/>
+    </LinearLayout>
+</LinearLayout>
