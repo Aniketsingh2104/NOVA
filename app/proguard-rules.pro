@@ -1,0 +1,8 @@
+-keep class com.nova.app.engine.** { *; }
+-keep class com.nova.app.db.** { *; }
+-keep class com.nova.app.commands.** { *; }
+-keep class * extends androidx.room.RoomDatabase
+-keep @androidx.room.Entity class *
+-keep @androidx.room.Dao interface *
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
