@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NOVA</string>
+    <string name="accessibility_service_label">NOVA Voice Controller</string>
+    <string name="accessibility_service_description">NOVA uses accessibility to control your phone via voice — navigating, scrolling, tapping buttons, and taking screenshots. All processing is done locally on your device.</string>
+</resources>
