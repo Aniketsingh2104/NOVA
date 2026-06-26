@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nova_purple">#7F77DD</color>
+    <color name="nova_purple_dark">#534AB7</color>
+    <color name="nova_teal">#1D9E75</color>
+    <color name="bg_dark">#0F0F12</color>
+    <color name="bg_card">#1A1A22</color>
+    <color name="text_primary">#F0EFF8</color>
+    <color name="text_secondary">#9896B4</color>
+    <color name="text_muted">#5A5875</color>
+    <color name="status_green">#1D9E75</color>
+    <color name="border">#2A2A38</color>
+    <color name="warning_bg">#2A220A</color>
+    <color name="warning_text">#FAC775</color>
+    <color name="surface_1">#16161E</color>
+</resources>
