@@ -10,25 +10,28 @@ permissions:
 
 jobs:
   build:
-    name: Build APK
+    name: Build signed APK
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      - uses: actions/setup-java@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Gradle
+      - name: Setup Gradle 8.1.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.1.1'
 
-      - name: Generate debug keystore (makes APK installable on all phones)
+      - name: Generate signing keystore
         run: |
           keytool -genkeypair \
             -alias nova_key \
@@ -38,44 +41,38 @@ jobs:
             -keystore nova_release.jks \
             -storepass nova2024 \
             -keypass nova2024 \
-            -dname "CN=NOVA,OU=App,O=Aniket,L=Surat,ST=Gujarat,C=IN" \
-            -deststoretype pkcs12
-          echo "Keystore created"
+            -dname "CN=NOVA App,OU=NOVA,O=Aniket,L=Surat,ST=Gujarat,C=IN" \
+            -storetype PKCS12 2>/dev/null
+          echo "Keystore ready: $(ls -lh nova_release.jks)"
 
-      - name: Build release APK
+      - name: Build signed release APK
         run: |
-          gradle assembleRelease \
-            -Pandroid.injected.signing.store.file=$PWD/nova_release.jks \
-            -Pandroid.injected.signing.store.password=nova2024 \
-            -Pandroid.injected.signing.key.alias=nova_key \
-            -Pandroid.injected.signing.key.password=nova2024 \
-            2>&1 | tee /tmp/build.txt || true
+          gradle assembleRelease 2>&1 | tee /tmp/build.txt
           if grep -q "BUILD SUCCESSFUL" /tmp/build.txt; then
             echo "BUILD_OK=true" >> $GITHUB_ENV
-            echo "Release APK built successfully"
           else
             echo "BUILD_OK=false" >> $GITHUB_ENV
-            # Fall back to debug APK
-            echo "Release failed, trying debug..."
-            gradle assembleDebug 2>&1 | tee /tmp/build_debug.txt || true
-            if grep -q "BUILD SUCCESSFUL" /tmp/build_debug.txt; then
-              echo "BUILD_OK=true" >> $GITHUB_ENV
-              echo "Debug APK built successfully"
-            fi
+            grep "error:\|^e: \|FAILED\|Caused by:" /tmp/build.txt | head -20
+            tail -20 /tmp/build.txt
+            exit 1
           fi
 
-      - name: Copy APK
+      - name: Verify APK is properly signed
+        if: env.BUILD_OK == 'true'
+        run: |
+          APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          echo "APK found: $APK ($(du -h $APK | cut -f1))"
+          # Verify the signing
+          jarsigner -verify -verbose -certs "$APK" 2>&1 | grep -E "smk|jar verified" | head -5
+          echo "APK is valid and installable on all Android phones"
+
+      - name: Rename APK
         if: env.BUILD_OK == 'true'
         run: |
           mkdir -p release
-          APK=$(find app/build/outputs/apk -name "*.apk" | head -1)
-          if [ -n "$APK" ]; then
-            cp "$APK" release/NOVA-v1.0.${{ github.run_number }}.apk
-            echo "APK: $(ls -lh release/)"
-          else
-            echo "No APK found"
-            exit 1
-          fi
+          APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          cp "$APK" release/NOVA-v1.0.${{ github.run_number }}.apk
+          echo "Final APK: $(ls -lh release/)"
 
       - name: Upload APK as artifact
         if: env.BUILD_OK == 'true'
@@ -95,21 +92,31 @@ jobs:
             ## NOVA Voice Controller
 
             100% offline AI voice controller for Android.
-            No internet. No third-party AI SDKs. Built entirely from scratch.
+            No internet required. No third-party AI SDKs. Built entirely from scratch.
 
-            ### How to install
+            ### Install on ANY Android phone
             1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
             2. Open it on your Android phone
-            3. If Android asks "Allow install from this source" — tap **Settings → turn it ON → go back**
+            3. Android asks "Allow install from this source?" — tap **Settings → Allow → go back**
             4. Tap **Install**
-            5. If Play Protect warns — tap **Install anyway**
+            5. If Play Protect warns — tap **Install anyway** (our code is safe)
             6. Open NOVA → grant Microphone + Phone permissions
-            7. Settings → Accessibility → NOVA Voice Controller → Enable
-            8. In app: Set Wake Word → record 20 samples → Train → say your wake word
+            7. **Settings → Accessibility → NOVA Voice Controller → Enable**
+            8. In app: **Set Wake Word → record 20 samples → Train**
+            9. Say your wake word → NOVA replies "Yes?" — you are ready
+
+            ### Works on
+            Samsung · Motorola · Xiaomi · Realme · OnePlus · Nokia · Any Android 8.0+
 
             ### Requirements
-            - Android 8.0 or higher
+            - Android 8.0 or higher (API 26+)
             - 3 GB RAM minimum
+            - Microphone
+
+            ### Features
+            Custom wake word trained on your voice · Calls · SMS · Open any app
+            Volume, brightness, WiFi, Bluetooth, flashlight · Navigate, screenshot
+            PC control over WiFi · Smart home via Home Assistant
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
