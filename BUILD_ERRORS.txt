@@ -1,27 +1,46 @@
 === FAILED tasks ===
-BUILD FAILED in 5s
+> Task :app:packageDebugResources FAILED
+> Task :app:mergeDebugResources FAILED
+BUILD FAILED in 29s
 
 === Last 40 lines ===
-Starting a Gradle Daemon (subsequent builds will be faster)
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1782508501032.json
+    	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+    	at org.gradle.internal.concurrent.ManagedExecutorImpl$1.run(ManagedExecutorImpl.java:49)
+    	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+    	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+    	at java.base/java.lang.Thread.run(Thread.java:840)
+    
 
-FAILURE: Build failed with an exception.
+> Task :app:mergeDebugResources FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1782508593804.json
 
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
 * What went wrong:
-A problem occurred configuring root project 'NOVA'.
-> Could not resolve all files for configuration ':classpath'.
-   > Cannot resolve external dependency com.android.tools.build:gradle:8.1.0 because no repositories are defined.
-     Required by:
-         project :
-   > Cannot resolve external dependency org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0 because no repositories are defined.
-     Required by:
-         project :
+Execution failed for task ':app:packageDebugResources'.
+> /home/runner/work/NOVA/NOVA/app/src/main/res/layout/activity_main.xml:51:25: Error: Element type "TextView" must be followed by either attribute specifications, ">" or "/>".
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
 > Run with --info or --debug option to get more log output.
 > Run with --scan to get full insights.
+==============================================================================
+
+2: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:mergeDebugResources'.
+> /home/runner/work/NOVA/NOVA/app/src/main/res/layout/activity_main.xml:51:25: Error: Element type "TextView" must be followed by either attribute specifications, ">" or "/>".
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+==============================================================================
 
 * Get more help at https://help.gradle.org
 
-BUILD FAILED in 5s
+BUILD FAILED in 29s
+4 actionable tasks: 4 executed
