@@ -1,18 +1,21 @@
 === FAILED tasks ===
-BUILD FAILED in 6s
+BUILD FAILED in 5s
 
 === Last 40 lines ===
 Starting a Gradle Daemon (subsequent builds will be faster)
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1782508415657.json
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1782508501032.json
 
 FAILURE: Build failed with an exception.
 
-* Where:
-Build file '/home/runner/work/NOVA/NOVA/build.gradle' line: 14
-
 * What went wrong:
-A problem occurred evaluating root project 'NOVA'.
-> Build was configured to prefer settings repositories over project repositories but repository 'Google' was added by build file 'build.gradle'
+A problem occurred configuring root project 'NOVA'.
+> Could not resolve all files for configuration ':classpath'.
+   > Cannot resolve external dependency com.android.tools.build:gradle:8.1.0 because no repositories are defined.
+     Required by:
+         project :
+   > Cannot resolve external dependency org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0 because no repositories are defined.
+     Required by:
+         project :
 
 * Try:
 > Run with --stacktrace option to get the stack trace.
@@ -21,4 +24,4 @@ A problem occurred evaluating root project 'NOVA'.
 
 * Get more help at https://help.gradle.org
 
-BUILD FAILED in 6s
+BUILD FAILED in 5s
