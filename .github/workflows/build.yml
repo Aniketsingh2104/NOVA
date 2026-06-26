@@ -19,19 +19,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.1.1'
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug
 
       - name: Copy APK to release folder
         run: |
           mkdir -p release
           find app/build/outputs/apk -name "*.apk" -exec cp {} release/NOVA-v1.0.${{ github.run_number }}.apk \;
-          echo "APK ready:"
           ls -lh release/
 
       - name: Upload APK as artifact
@@ -56,22 +56,19 @@ jobs:
             1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
             2. Open it on your Android phone
             3. If prompted allow **Install unknown apps** then tap **Install**
-            4. Open NOVA and grant Microphone + Phone permissions
+            4. Open NOVA, grant Microphone + Phone permissions
             5. Settings → Accessibility → NOVA Voice Controller → Enable
             6. In NOVA app: Set Wake Word → record 20 samples → Train
             7. Say your wake word — NOVA replies "Yes?"
 
             ### Requirements
-            - Android 8.0 or higher (API 26+)
+            - Android 8.0 or higher
             - 3 GB RAM minimum
-            - Microphone
 
             ### Features
-            - Custom wake word trained on your own voice
-            - Calls, SMS, open any app
-            - Volume, brightness, WiFi, Bluetooth, flashlight
-            - Navigate — home, back, recents, scroll, screenshot
-            - PC control over WiFi, Smart home via Home Assistant
+            Custom wake word • Calls • SMS • Open apps
+            Volume, brightness, WiFi, Bluetooth, flashlight
+            Navigate, screenshot • PC control • Smart home
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
