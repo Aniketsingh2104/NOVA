@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build APK
@@ -21,17 +24,38 @@ jobs:
       - run: chmod +x gradlew
 
       - name: Build debug APK
+        id: build
         run: |
-          set -o pipefail
-          ./gradlew assembleDebug --info 2>&1 | grep -E "error:|e: |FAILED|Task|BUILD" | tail -80
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug 2>&1 | tee build_output.txt || true
+          if grep -q "BUILD SUCCESSFUL" build_output.txt; then
+            echo "SUCCESS=true" >> $GITHUB_OUTPUT
+            echo "Build succeeded"
+          else
+            echo "SUCCESS=false" >> $GITHUB_OUTPUT
+            echo "=== ERRORS ===" >> error_summary.txt
+            grep -E "^e: |error:|Error |FAILED|Caused by:" build_output.txt | head -30 >> error_summary.txt || true
+            echo "=== LAST 30 LINES ===" >> error_summary.txt
+            tail -30 build_output.txt >> error_summary.txt
+            cat error_summary.txt
+            exit 1
+          fi
+
+      - name: Upload error summary
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-summary
+          path: error_summary.txt
+          retention-days: 1
 
       - name: Copy APK
+        if: steps.build.outputs.SUCCESS == 'true'
         run: |
           mkdir -p release
           find app/build/outputs/apk -name "*.apk" -exec cp {} release/NOVA-v1.0.${{ github.run_number }}.apk \;
 
       - name: Upload APK artifact
+        if: steps.build.outputs.SUCCESS == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: NOVA-APK
@@ -39,6 +63,7 @@ jobs:
           retention-days: 90
 
       - name: Create GitHub Release
+        if: steps.build.outputs.SUCCESS == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
@@ -48,7 +73,12 @@ jobs:
 
             100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            Install: download the APK below, open on your Android phone, allow unknown apps, tap Install.
+            ### How to install
+            1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
+            2. Open the file on your Android phone
+            3. If prompted, allow **Install unknown apps**
+            4. Tap **Install**
+            5. Open NOVA → grant Microphone permission → enable Accessibility Service → train wake word
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
