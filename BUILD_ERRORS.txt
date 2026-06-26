@@ -1,11 +1,24 @@
-=== Kotlin errors ===
-none
-
-=== error: lines ===
-
 === FAILED tasks ===
-Caused by: java.lang.ClassNotFoundException: 
+BUILD FAILED in 6s
 
-=== Last 20 lines ===
-Error: Could not find or load main class 
-Caused by: java.lang.ClassNotFoundException: 
+=== Last 40 lines ===
+Starting a Gradle Daemon (subsequent builds will be faster)
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run-1782508415657.json
+
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/home/runner/work/NOVA/NOVA/build.gradle' line: 14
+
+* What went wrong:
+A problem occurred evaluating root project 'NOVA'.
+> Build was configured to prefer settings repositories over project repositories but repository 'Google' was added by build file 'build.gradle'
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 6s
