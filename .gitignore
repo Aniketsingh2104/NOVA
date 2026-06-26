@@ -1,0 +1,14 @@
+*.apk
+*.aab
+build/
+app/build/
+local.properties
+.gradle/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+training/wake_word/positive/
+training/wake_word/negative/
+app/src/main/assets/models/*.nova
+app/src/main/assets/tts_phrases/
