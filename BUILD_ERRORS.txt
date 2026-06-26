@@ -1,0 +1,11 @@
+=== Kotlin errors ===
+none
+
+=== error: lines ===
+
+=== FAILED tasks ===
+Caused by: java.lang.ClassNotFoundException: 
+
+=== Last 20 lines ===
+Error: Could not find or load main class 
+Caused by: java.lang.ClassNotFoundException: 
