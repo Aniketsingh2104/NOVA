@@ -24,18 +24,32 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          ./gradlew assembleDebug 2>&1 | tee /tmp/build.log
+          exit ${PIPESTATUS[0]}
 
-      - name: List APK output
-        run: find app/build/outputs/apk -name "*.apk" -exec ls -la {} \;
+      - name: Commit error log if failed
+        if: failure()
+        run: |
+          ERRORS=$(cat /tmp/build.log | grep -E "error:|Error " | head -20 || echo "no specific errors found")
+          echo "BUILD ERRORS:" > error_report.txt
+          echo "$ERRORS" >> error_report.txt
+          cat /tmp/build.log | grep -A3 -B1 "error:" >> error_report.txt 2>/dev/null || true
 
-      - name: Copy and rename APK
+      - name: Upload error log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-errors
+          path: /tmp/build.log
+          retention-days: 1
+
+      - name: Copy APK
         run: |
           mkdir -p release
           find app/build/outputs/apk -name "*.apk" -exec cp {} release/NOVA-v1.0.${{ github.run_number }}.apk \;
-          ls -la release/
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NOVA-APK
@@ -49,25 +63,13 @@ jobs:
           name: NOVA v1.0.${{ github.run_number }}
           body: |
             ## NOVA Voice Controller
-
             100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            ### How to install
-            1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
-            2. Open it on your Android phone
-            3. If prompted, tap Settings and allow "Install unknown apps"
-            4. Tap Install
-            5. Open NOVA, grant Microphone permission, enable Accessibility Service, train your wake word
-
-            ### Requirements
-            - Android 8.0+ (API 26)
-            - 3 GB RAM minimum
-            - Microphone
-
-            ### First time setup
-            After installing: Set Wake Word → record 20 samples → tap Train → say your wake word → NOVA says "Yes?"
+            ### Install
+            1. Download NOVA-*.apk below
+            2. Open on your Android phone
+            3. Allow "Install unknown apps" if prompted → Install
+            4. Open NOVA → grant permissions → enable Accessibility → train wake word
           files: release/NOVA-*.apk
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
