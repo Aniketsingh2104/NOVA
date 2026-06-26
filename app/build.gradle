@@ -3,35 +3,58 @@ plugins {
     id "kotlin-android"
     id "kotlin-kapt"
 }
+
 android {
     namespace "com.nova.app"
     compileSdk 34
+
     defaultConfig {
         applicationId "com.nova.app"
         minSdk 26
         targetSdk 34
-        versionCode 4
-        versionName "4.0.0-scratch"
+        versionCode 1
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    signingConfigs {
+        release {
+            storeFile file("../nova_release.jks")
+            storePassword "nova2024"
+            keyAlias "nova_key"
+            keyPassword "nova2024"
+        }
+        debug {
+            storeFile file("../nova_release.jks")
+            storePassword "nova2024"
+            keyAlias "nova_key"
+            keyPassword "nova2024"
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
         debug {
+            signingConfig signingConfigs.debug
             debuggable true
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { viewBinding true }
     aaptOptions { noCompress "nova", "pcm" }
     lint { abortOnError false }
 }
+
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
