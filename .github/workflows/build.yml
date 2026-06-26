@@ -21,13 +21,15 @@ jobs:
       - run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --info 2>&1 | grep -E "error:|e: |FAILED|Task|BUILD" | tail -80
+          ./gradlew assembleDebug
 
       - name: Copy APK
         run: |
           mkdir -p release
           find app/build/outputs/apk -name "*.apk" -exec cp {} release/NOVA-v1.0.${{ github.run_number }}.apk \;
-          ls -la release/
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -44,32 +46,9 @@ jobs:
           body: |
             ## NOVA Voice Controller
 
-            100% offline AI voice controller for Android.
-            Built entirely from scratch — no third-party AI SDKs.
+            100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            ### How to install
-            1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
-            2. Open the file on your Android phone
-            3. If prompted "Install unknown apps" — tap Settings → Allow
-            4. Tap **Install**
-            5. Open NOVA → grant Microphone permission
-            6. Go to Settings → Accessibility → NOVA Voice Controller → Enable
-            7. In app: Set Wake Word → record 20 samples → Train → say your wake word
-
-            ### Requirements
-            - Android 8.0 or higher
-            - 3 GB RAM minimum
-            - Microphone
-
-            ### What NOVA can do
-            - Wake on your custom word (trained on your voice)
-            - Calls, SMS, WhatsApp
-            - Open any app
-            - Volume, brightness, WiFi, Bluetooth, flashlight
-            - Navigate — home, back, recent apps, scroll, screenshot
-            - Screen reading and vision
-            - PC control over LAN
-            - Smart home via Home Assistant
+            Install: download the APK below, open on your Android phone, allow unknown apps, tap Install.
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
