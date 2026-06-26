@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - uses: actions/setup-java@v4
         with:
@@ -25,16 +28,39 @@ jobs:
         with:
           gradle-version: '8.1.1'
 
-      - name: Build debug APK
-        run: gradle assembleDebug
+      - name: Build APK and capture errors
+        run: |
+          gradle assembleDebug 2>&1 | tee /tmp/build.txt || true
+          if grep -q "BUILD SUCCESSFUL" /tmp/build.txt; then
+            echo "BUILD_OK=true" >> $GITHUB_ENV
+          else
+            echo "BUILD_OK=false" >> $GITHUB_ENV
+            {
+              echo "=== FAILED tasks ==="
+              grep "FAILED\|Caused by:\|error:" /tmp/build.txt | head -20 || true
+              echo ""
+              echo "=== Last 40 lines ==="
+              tail -40 /tmp/build.txt
+            } > BUILD_ERRORS.txt
+            git config user.email "ci@nova.app"
+            git config user.name "NOVA CI"
+            git add BUILD_ERRORS.txt
+            git diff --cached --quiet || git commit -m "ci: build errors"
+            git push || true
+          fi
 
-      - name: Copy APK to release folder
+      - name: Fail if build failed
+        if: env.BUILD_OK == 'false'
+        run: exit 1
+
+      - name: Copy APK
+        if: env.BUILD_OK == 'true'
         run: |
           mkdir -p release
           find app/build/outputs/apk -name "*.apk" -exec cp {} release/NOVA-v1.0.${{ github.run_number }}.apk \;
-          ls -lh release/
 
       - name: Upload APK as artifact
+        if: env.BUILD_OK == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: NOVA-APK
@@ -42,33 +68,16 @@ jobs:
           retention-days: 90
 
       - name: Create GitHub Release
+        if: env.BUILD_OK == 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: "NOVA v1.0.${{ github.run_number }}"
           body: |
             ## NOVA Voice Controller
+            100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            100% offline AI voice controller for Android.
-            No internet. No third-party AI SDKs. Built entirely from scratch.
-
-            ### How to install
-            1. Download **NOVA-v1.0.${{ github.run_number }}.apk** below
-            2. Open it on your Android phone
-            3. If prompted allow **Install unknown apps** then tap **Install**
-            4. Open NOVA, grant Microphone + Phone permissions
-            5. Settings → Accessibility → NOVA Voice Controller → Enable
-            6. In NOVA app: Set Wake Word → record 20 samples → Train
-            7. Say your wake word — NOVA replies "Yes?"
-
-            ### Requirements
-            - Android 8.0 or higher
-            - 3 GB RAM minimum
-
-            ### Features
-            Custom wake word • Calls • SMS • Open apps
-            Volume, brightness, WiFi, Bluetooth, flashlight
-            Navigate, screenshot • PC control • Smart home
+            Install: download the APK, open on Android, allow unknown apps, tap Install.
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
