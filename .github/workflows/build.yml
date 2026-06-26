@@ -36,16 +36,19 @@ jobs:
           else
             echo "BUILD_OK=false" >> $GITHUB_ENV
             {
-              echo "=== FAILED tasks ==="
-              grep "FAILED\|Caused by:\|error:" /tmp/build.txt | head -20 || true
+              echo "=== Kotlin errors ==="
+              grep "^e: " /tmp/build.txt || echo "none"
               echo ""
-              echo "=== Last 40 lines ==="
-              tail -40 /tmp/build.txt
+              echo "=== FAILED tasks ==="
+              grep "FAILED\|Caused by:" /tmp/build.txt | head -10 || echo "none"
+              echo ""
+              echo "=== Last 50 lines ==="
+              tail -50 /tmp/build.txt
             } > BUILD_ERRORS.txt
             git config user.email "ci@nova.app"
             git config user.name "NOVA CI"
             git add BUILD_ERRORS.txt
-            git diff --cached --quiet || git commit -m "ci: build errors"
+            git diff --cached --quiet || git commit -m "ci: build errors $(date +%s)"
             git push || true
           fi
 
@@ -77,7 +80,11 @@ jobs:
             ## NOVA Voice Controller
             100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            Install: download the APK, open on Android, allow unknown apps, tap Install.
+            ### Install
+            1. Download NOVA-*.apk below
+            2. Open on your Android phone
+            3. Allow "Install unknown apps" if prompted → tap Install
+            4. Open NOVA → grant permissions → enable Accessibility → train wake word
           files: release/NOVA-*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
