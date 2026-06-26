@@ -24,12 +24,17 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace 2>&1 | tee build.log || (cat build.log | grep -A 5 "error:" | head -50 && exit 1)
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
 
       - name: Rename APK
-        run: |
-          mv app/build/outputs/apk/debug/app-debug.apk \
-             app/build/outputs/apk/debug/NOVA-v${{ github.run_number }}.apk
+        run: mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/NOVA-v1.0.${{ github.run_number }}.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -46,18 +51,14 @@ jobs:
           body: |
             ## NOVA Voice Controller
 
-            100% offline AI voice controller for Android. No internet. No third-party SDKs.
+            100% offline AI voice controller for Android. No internet. No third-party AI SDKs.
 
-            ### How to install
+            ### Install
             1. Download NOVA-*.apk below
             2. Open it on your Android phone
-            3. If prompted, allow "Install unknown apps" for your browser
+            3. Allow "Install unknown apps" if prompted
             4. Tap Install
-            5. Open NOVA, grant permissions, enable Accessibility Service, train your wake word
-
-            ### Requirements
-            - Android 8.0 or higher
-            - 3 GB RAM minimum
+            5. Open NOVA → grant permissions → enable Accessibility Service → train wake word
           files: app/build/outputs/apk/debug/NOVA-*.apk
           draft: false
           prerelease: false
